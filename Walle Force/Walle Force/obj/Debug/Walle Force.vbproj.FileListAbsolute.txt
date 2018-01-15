@@ -1,0 +1,11 @@
+C:\Users\gusta\Projetos\Walle Force\Walle Force\obj\Debug\Walle Force.vbprojResolveAssemblyReference.cache
+C:\Users\gusta\Projetos\Walle Force\Walle Force\obj\Debug\Walle_Force.Resources.resources
+C:\Users\gusta\Projetos\Walle Force\Walle Force\obj\Debug\Walle Force.vbproj.GenerateResource.Cache
+C:\Users\gusta\Projetos\Walle Force\Walle Force\bin\Debug\4fkhost.exe.config
+C:\Users\gusta\Projetos\Walle Force\Walle Force\bin\Debug\4fkhost.exe
+C:\Users\gusta\Projetos\Walle Force\Walle Force\bin\Debug\4fkhost.pdb
+C:\Users\gusta\Projetos\Walle Force\Walle Force\bin\Debug\4fkhost.xml
+C:\Users\gusta\Projetos\Walle Force\Walle Force\obj\Debug\4fkhost.exe
+C:\Users\gusta\Projetos\Walle Force\Walle Force\obj\Debug\4fkhost.xml
+C:\Users\gusta\Projetos\Walle Force\Walle Force\obj\Debug\4fkhost.pdb
+C:\Users\gusta\Projetos\Walle Force\Walle Force\obj\Debug\Walle_Force.Frm_Principal.resources
