@@ -9,6 +9,7 @@ Public Class Funcoes_Sistema
     'Criptografia
     Dim textoCifrado As Byte()
     Dim sal() As Byte = {&H0, &H1, &H2, &H3, &H4, &H5, &H6, &H5, &H4, &H3, &H2, &H1, &H0}
+    Dim Pub As New Util
 
     Public Sub VerificarAtualizacaoFTP(ByVal Server As String, ByVal Arquivo As String,
                                      ByVal usuarioftp As String, ByVal senhaftp As String, ByVal ClienteCod As String, ByVal Tipo As Integer)
@@ -29,7 +30,7 @@ Public Class Funcoes_Sistema
 
         Local = Local.Replace("4fkhost.exe", "")
 
-        Dim FtpClient As FtpWebRequest = FtpWebRequest.Create("ftp://ftp.fourkey.com.br/Walle/Client/" & ClienteCod & "/Refresh/" & linhatexto)
+        Dim FtpClient As FtpWebRequest = FtpWebRequest.Create(Frm_Principal.CaminhoFTP & "/Walle/Client/" & ClienteCod & "/Refresh/" & linhatexto)
         FtpClient.Credentials = New NetworkCredential(usuarioftp, senhaftp)
         FtpClient.Method = WebRequestMethods.Ftp.DownloadFile
         FtpClient.UsePassive = False
@@ -95,7 +96,12 @@ Public Class Funcoes_Sistema
 
                 If processo.ProcessName = "Walle_Client" Then
 
-                    processo.Kill()
+                    Try
+                        processo.Kill()
+                    Catch ex As Exception
+
+                    End Try
+
 
                 End If
 
@@ -175,7 +181,7 @@ Public Class Funcoes_Sistema
 
         Local = Local.Replace("4fkhost.exe", "")
 
-        Dim FtpClient As FtpWebRequest = FtpWebRequest.Create("ftp://ftp.fourkey.com.br/Walle/Client/" & ClienteCod & "/Refresh/" & linhatexto)
+        Dim FtpClient As FtpWebRequest = FtpWebRequest.Create(Frm_Principal.CaminhoFTP & "/Walle/Client/" & ClienteCod & "/Refresh/" & linhatexto)
         FtpClient.Credentials = New NetworkCredential(usuarioftp, senhaftp)
         FtpClient.Method = WebRequestMethods.Ftp.DownloadFile
         FtpClient.UsePassive = False
@@ -239,8 +245,12 @@ Public Class Funcoes_Sistema
             For Each processo As Process In Process.GetProcesses()
 
                 If processo.ProcessName = "Walle_Client_Data" Then
+                    Try
+                        processo.Kill()
+                    Catch ex As Exception
 
-                    processo.Kill()
+                    End Try
+
 
                 End If
 
@@ -279,12 +289,12 @@ Public Class Funcoes_Sistema
 
     Public Function GetUserClient() As String
 
-        Dim chave As New Rfc2898DeriveBytes("yekruof", sal)
+        Dim chave As New Rfc2898DeriveBytes(Pub.Decifra(My.Settings.KeyGetUser), sal)
         Dim algoritmo = New RijndaelManaged()
         Dim fluxoTexto As IO.StreamReader
         Dim linhaTexto As String
         Dim Cliente As String = ""
-        Dim USERCLIENT As String = System.Reflection.Assembly.GetExecutingAssembly().Location & "USERCLIENT.txt"
+        Dim USERCLIENT As String = My.Settings.Location & "USERCLIENT.txt"
 
         USERCLIENT = USERCLIENT.Replace("4fkhost.exe", "")
 
@@ -322,7 +332,6 @@ Public Class Funcoes_Sistema
         Else
 
             MsgBox("Walle: Atenção alguns arquivos foram movidos ou modificados indevidamente, por favor entre em contato com o fornecedor.", vbExclamation)
-
             Application.Exit()
 
         End If

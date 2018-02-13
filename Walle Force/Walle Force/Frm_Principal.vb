@@ -1,4 +1,5 @@
 ﻿Imports System.IO
+Imports System.Configuration
 
 Public Class Frm_Principal
 
@@ -6,8 +7,9 @@ Public Class Frm_Principal
     Dim Code As String = My.Settings.Code
     Dim Code2 As String = My.Settings.Code2
     Public LocationCall As String = System.Reflection.Assembly.GetExecutingAssembly().Location
-    Public Shared UserCript As String = My.Settings.CriptUser
-    Public Shared PassCript As String = My.Settings.CriptPass
+    Public Shared UserCript As String
+    Public Shared PassCript As String
+    Public Shared CaminhoFTP As String
     Public CodCliente As String
     Public RefreshProvisorio As String
     Public RefreshProvisorioExe As String
@@ -15,6 +17,8 @@ Public Class Frm_Principal
     Dim ValidarClient As Boolean = False
     Dim ValidarData As Boolean = False
     Dim fluxoTexto As IO.StreamWriter
+
+    Dim Pub As New Util
 
     Private Sub Form1_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
 
@@ -35,9 +39,9 @@ Public Class Frm_Principal
 
             ElseIf Txt_Code.Text = "minimizar" Then
 
-                Me.ShowInTaskbar = False
-                Me.WindowState = FormWindowState.Minimized
-                t_open.Enabled = True
+                'Me.ShowInTaskbar = False
+                'Me.WindowState = FormWindowState.Minimized
+                't_open.Enabled = True
 
                 File.Delete(LocationCall & "\OPEN.txt")
 
@@ -53,68 +57,116 @@ Public Class Frm_Principal
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
-        Dim Cont As Integer
+        Try
 
-        LocationCall = LocationCall.Replace("4fkhost.exe", "")
+            Dim Cont As Integer
 
-        Me.ShowInTaskbar = False
-        Me.WindowState = FormWindowState.Minimized
-        Application.DoEvents()
+            LocationCall = My.Settings.Location
+            LocationCall = LocationCall.Replace("4fkhost.exe", "")
 
-        For Each processo As Process In Process.GetProcesses()
+            Pub.Escreve_Log("Iniciando Walle Force")
 
-            If processo.ProcessName = "4fkhost" Then
+            UserCript = Pub.Decifra(My.Settings.CriptUser)
+            PassCript = Pub.Decifra(My.Settings.CriptPass)
+            CaminhoFtp = Pub.Decifra(My.Settings.PathFtp)
 
-                Cont = Cont + 1
+            Me.ShowInTaskbar = False
+            Me.WindowState = FormWindowState.Minimized
+            Application.DoEvents()
 
-            End If
+            AtualizarSistemaCompleto()
 
-        Next processo
+            Pub.Escreve_Log("Verificando Walle Force já aberto")
 
-        If Cont > 1 Then
+            For Each processo As Process In Process.GetProcesses()
 
-            Application.Exit()
+                If processo.ProcessName = "4fkhost" Then
 
-        End If
+                    Cont = Cont + 1
 
-        Cont = 0
+                End If
 
-        For Each processo As Process In Process.GetProcesses()
+            Next processo
 
-            If processo.ProcessName = "Walle_Client" Then
+            If Cont > 1 Then
 
-                Cont = Cont + 1
-
-            End If
-
-        Next processo
-
-        If Cont > 0 Then
-
-            Shell(LocationCall & "\Walle_Client.exe")
-
-        End If
-
-        Cont = 0
-
-        For Each processo As Process In Process.GetProcesses()
-
-            If processo.ProcessName = "Walle_Client_Data" Then
-
-                Cont = Cont + 1
+                Pub.Escreve_Log("Já existe uma instância 4fkhost em execução")
+                'Application.Exit()
 
             End If
 
-        Next processo
+            Cont = 0
 
-        If Cont > 0 Then
+            Pub.Escreve_Log("Verificando execução Walle CLient")
 
-            Shell(LocationCall & "\Walle_Client_Data.exe")
+            For Each processo As Process In Process.GetProcesses()
 
-        End If
+                If processo.ProcessName = "Walle_Client" Then
 
-        'Shell(LocationCall & "\Walle_Client.exe")
-        AtualizarSistemaCompleto()
+                    Cont = Cont + 1
+                    If Cont > 1 Then
+                        processo.Kill()
+                    End If
+
+                End If
+
+            Next processo
+
+            If Cont <= 2 Then
+
+                Pub.Escreve_Log("Nenhuma instância aberta do Walle Client, abrindo instância...")
+
+                Dim Exe As String = LocationCall & "Walle_Client.exe"
+
+                If Not File.Exists(Exe) Then
+                    Pub.Escreve_Log("Walle_Client.EXE não encontrado.")
+                Else
+                    Process.Start(Exe)
+                End If
+
+            End If
+
+            Cont = 0
+
+            Pub.Escreve_Log("Verificando execução Walle CLient Data")
+
+            For Each processo As Process In Process.GetProcesses()
+
+                If processo.ProcessName = "Walle_Client_Data" Then
+
+
+                    Cont = Cont + 1
+                    If Cont > 1 Then
+                        processo.Kill()
+                    End If
+
+                End If
+
+            Next processo
+
+            If Cont <= 2 Then
+
+                Dim Exe As String = LocationCall & "Walle_Client_Data.exe"
+
+                If Not File.Exists(Exe) Then
+                    Pub.Escreve_Log("Walle_Client_Data.EXE não encontrado.")
+                Else
+                    Process.Start(Exe)
+                End If
+
+            End If
+
+            t_Controle.Enabled = True
+            Me.Hide()
+            Me.ShowInTaskbar = False
+
+            'Shell(LocationCall & "\Walle_Client.exe")
+
+        Catch ex As Exception
+
+            Pub.Escreve_Log("Erro na execução: " & ex.Message)
+
+        End Try
 
     End Sub
 
@@ -122,62 +174,67 @@ Public Class Frm_Principal
 
         LocationCall = LocationCall.Replace("4fkhost.exe", "")
 
-        Try
+        If Pub.VerificaConexaoFtp() = True Then
 
-            CodCliente = Funcao.GetUserClient()
+            Pub.Escreve_Log("Verificando atualização dos sistemas")
 
-            'Faz o download do arquivo txt da data da ultima versao disponibilizada Walle_Client
-            Funcao.VerificarAtualizacaoFTP("ftp://ftp.fourkey.com.br", "Walle_Client.exe", UserCript, PassCript, CodCliente, 0)
+            Try
 
-            'Se o arquivo txt possuir uma data antiga da data que esta no ftp ele atualiza
-            If Funcao.GetValidacaoVersao(RefreshProvisorio) Then
-
-                'Atualiza a versao do Client
-                Funcao.VerificarAtualizacaoFTP("ftp://ftp.fourkey.com.br", "Walle_Client.exe", UserCript, PassCript, CodCliente, 1)
-
-            Else
-
-                File.Delete(LocationCall & "\REFRESH_TRANSFER.txt")
-
-            End If
-
-            If File.Exists(LocationCall & "\NODATA.txt") = False Then
+                CodCliente = Funcao.GetUserClient()
 
                 'Faz o download do arquivo txt da data da ultima versao disponibilizada Walle_Client
-                Funcao.VerificarAtualizacaoFTPData("ftp://ftp.fourkey.com.br", "Walle_Client.exe", UserCript, PassCript, CodCliente, 0)
+                Funcao.VerificarAtualizacaoFTP(CaminhoFTP, "Walle_Client.exe", UserCript, PassCript, CodCliente, 0)
 
                 'Se o arquivo txt possuir uma data antiga da data que esta no ftp ele atualiza
-                If Funcao.GetValidacaoVersaoData(RefreshProvisorio) Then
+                If Funcao.GetValidacaoVersao(RefreshProvisorio) Then
 
                     'Atualiza a versao do Client
-                    Funcao.VerificarAtualizacaoFTPData("ftp://ftp.fourkey.com.br", "Walle_Client.exe", UserCript, PassCript, CodCliente, 1)
+                    Funcao.VerificarAtualizacaoFTP(CaminhoFTP, "Walle_Client.exe", UserCript, PassCript, CodCliente, 1)
 
                 Else
 
-                    File.Delete(LocationCall & "\REFRESH_TRANSFER2.txt")
+                    File.Delete(LocationCall & "\REFRESH_TRANSFER.txt")
 
                 End If
 
-            End If
+                If File.Exists(LocationCall & "\NODATA.txt") = False Then
 
-            SetAttr(LocationCall & "\REFRESH.txt", vbHidden)
-            SetAttr(LocationCall & "\REFRESHDATA.txt", vbHidden)
+                    'Faz o download do arquivo txt da data da ultima versao disponibilizada Walle_Client
+                    Funcao.VerificarAtualizacaoFTPData(CaminhoFTP, "Walle_Client.exe", UserCript, PassCript, CodCliente, 0)
 
-            Shell(LocationCall & "\Walle_Client.exe")
+                    'Se o arquivo txt possuir uma data antiga da data que esta no ftp ele atualiza
+                    If Funcao.GetValidacaoVersaoData(RefreshProvisorio) Then
 
-        Catch ex As Exception
+                        'Atualiza a versao do Client
+                        Funcao.VerificarAtualizacaoFTPData(CaminhoFTP, "Walle_Client.exe", UserCript, PassCript, CodCliente, 1)
 
-            fluxoTexto = New IO.StreamWriter(LocationCall & "\Logs\Walle_Force-" _
-                                                    & Format(Now, "yyyy-MM-dd-HH-mm-ss") & ".txt")
+                    Else
 
-            fluxoTexto.WriteLine(ex.Message)
-            fluxoTexto.Close()
+                        File.Delete(LocationCall & "\REFRESH_TRANSFER2.txt")
 
-        End Try
+                    End If
+
+                End If
+
+                SetAttr(LocationCall & "\REFRESH.txt", vbHidden)
+                SetAttr(LocationCall & "\REFRESHDATA.txt", vbHidden)
+
+                Process.Start(LocationCall & "\Walle_Client.exe")
+
+            Catch ex As Exception
+
+                Pub.Escreve_Log(ex.Message)
+
+
+            End Try
+
+        End If
 
     End Sub
 
     Private Sub t_Controle_Tick(sender As Object, e As EventArgs) Handles t_Controle.Tick
+
+        Pub.Escreve_Log("Verificando processos abertos...")
 
         Dim DataAgora As Date = Format(Now, "yyyy-MM-dd")
 
@@ -223,13 +280,30 @@ Public Class Frm_Principal
 
         If ValidarClient = False Then
 
-            Shell(LocationCall & "\Walle_Client.exe")
 
+
+            Dim Exe As String = LocationCall & "Walle_Client.exe"
+
+            If Not File.Exists(Exe) Then
+                Pub.Escreve_Log("Walle_Client.EXE não encontrado.")
+            Else
+
+                Pub.Escreve_Log("Nenhuma instância aberta do Walle Client, abrindo instância...")
+                Process.Start(Exe)
+
+            End If
         End If
 
         If ValidarData = False Then
 
-            Shell(LocationCall & "\Walle_Client_Data.exe")
+            Dim Exe As String = LocationCall & "Walle_Client_Data.exe"
+
+            If Not File.Exists(Exe) Then
+                Pub.Escreve_Log("Walle_Client_Data.EXE não encontrado.")
+            Else
+                Pub.Escreve_Log("Nenhuma instância aberta do Walle Client Data, abrindo instância...")
+                Process.Start(Exe)
+            End If
 
         End If
 
@@ -252,9 +326,9 @@ Public Class Frm_Principal
 
     Private Sub NotifyIcon1_MouseDoubleClick(sender As Object, e As MouseEventArgs)
 
-        Me.Show()
-        Me.WindowState = FormWindowState.Normal
-        Me.ShowInTaskbar = True
+        'Me.Show()
+        'Me.WindowState = FormWindowState.Normal
+        'Me.ShowInTaskbar = True
 
     End Sub
 
@@ -262,9 +336,9 @@ Public Class Frm_Principal
 
         If File.Exists(LocationCall & "\OPEN.txt") = True Then
 
-            Me.Show()
-            Me.WindowState = FormWindowState.Normal
-            Me.ShowInTaskbar = True
+            'Me.Show()
+            'Me.WindowState = FormWindowState.Normal
+            'Me.ShowInTaskbar = True
 
             t_open.Enabled = False
 

@@ -9,3 +9,17 @@ C:\Users\gusta\Projetos\Walle Force\Walle Force\obj\Debug\4fkhost.exe
 C:\Users\gusta\Projetos\Walle Force\Walle Force\obj\Debug\4fkhost.xml
 C:\Users\gusta\Projetos\Walle Force\Walle Force\obj\Debug\4fkhost.pdb
 C:\Users\gusta\Projetos\Walle Force\Walle Force\obj\Debug\Walle_Force.Frm_Principal.resources
+C:\Users\luizh\source\Walle_Force\Walle Force\Walle Force\bin\Debug\4fkhost.exe.config
+C:\Users\luizh\source\Walle_Force\Walle Force\Walle Force\bin\Debug\4fkhost.exe
+C:\Users\luizh\source\Walle_Force\Walle Force\Walle Force\bin\Debug\4fkhost.pdb
+C:\Users\luizh\source\Walle_Force\Walle Force\Walle Force\bin\Debug\4fkhost.xml
+C:\Users\luizh\source\Walle_Force\Walle Force\Walle Force\obj\Debug\Walle Force.vbprojResolveAssemblyReference.cache
+C:\Users\luizh\source\Walle_Force\Walle Force\Walle Force\obj\Debug\Walle_Force.Frm_Principal.resources
+C:\Users\luizh\source\Walle_Force\Walle Force\Walle Force\obj\Debug\Walle_Force.Resources.resources
+C:\Users\luizh\source\Walle_Force\Walle Force\Walle Force\obj\Debug\Walle Force.vbproj.GenerateResource.Cache
+C:\Users\luizh\source\Walle_Force\Walle Force\Walle Force\obj\Debug\Walle Force.vbproj.CoreCompileInputs.cache
+C:\Users\luizh\source\Walle_Force\Walle Force\Walle Force\obj\Debug\4fkhost.exe
+C:\Users\luizh\source\Walle_Force\Walle Force\Walle Force\obj\Debug\4fkhost.xml
+C:\Users\luizh\source\Walle_Force\Walle Force\Walle Force\obj\Debug\4fkhost.pdb
+C:\Users\luizh\source\Walle_Force\Walle Force\Walle Force\bin\Debug\FourkeyCripto.dll
+C:\Users\luizh\source\Walle_Force\Walle Force\Walle Force\bin\Debug\FourkeyCripto.pdb
